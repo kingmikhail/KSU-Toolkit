@@ -14,9 +14,9 @@ int main(int argc, char *argv[]) {
 	int magic1 = 0xDEADBEEF;
 	int magic2 = 10006;
 	unsigned int cmd = strtoul(argv[1], NULL, 0);
-	const char *arg = "dummy_value";
+	uintptr_t arg;
 
-	printf("SYS_reboot(%d, %d, %u, %p)\n", magic1, magic2, cmd, (void *)&arg);
+	printf("SYS_reboot(0x%x, %d, %u, %p)\n", magic1, magic2, cmd, (void *)&arg);
 	syscall(SYS_reboot, magic1, magic2, cmd, (void *)&arg);
 
 	// if our arg contains our pointer then its good
