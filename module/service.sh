@@ -7,6 +7,6 @@ PATH=/data/adb/ksu/bin:$PATH
 MODDIR="/data/adb/modules/ksu_switch_manager"
 
 # just pull it out from /data/asystem/packages.list
-"$MODDIR/switch_uid" 12345 > /dev/null 2>&1
+"$MODDIR/uid_tool" --setuid 12345 > /dev/null 2>&1
 
 # EOF
