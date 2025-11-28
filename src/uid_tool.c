@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
 		
 		syscall(SYS_reboot, magic1, magic2, cmd, (void *)&arg);
 
-		if ( *(uintptr_t *)arg == arg ) {
+		if (arg && *(uintptr_t *)arg == arg ) {
 			syscall(SYS_write, 2, "ok\n", strlen("ok\n"));
 			return 0;
 		}
