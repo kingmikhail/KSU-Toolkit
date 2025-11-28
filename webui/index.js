@@ -54,7 +54,7 @@ function appendManagerList() {
         const container = document.createElement('div');
         container.className = 'manager-list-item';
         container.innerHTML = `
-            <label for="uid-${item.uid.toString()}">
+            <label for="${item.packageName}">
                 <img class="app-icon" src="ksu://icon/${item.packageName}" />
                 <div class="app-info">
                     <span class="app-label">
@@ -64,7 +64,7 @@ function appendManagerList() {
                     <span class="package-name">${item.packageName}</span>
                 </div>
             </label>
-            <md-radio id="uid-${item.uid.toString()}" name="manager-group" value="${item.uid.toString()}"></md-radio>
+            <md-radio id="${item.packageName}" name="manager-group" value="${item.uid.toString()}"></md-radio>
             <md-ripple></md-ripple>
         `;
         if (item.uid === currentUid) {
@@ -74,8 +74,9 @@ function appendManagerList() {
     });
 }
 
-async function setManager(uid) {
-    await exec(`uid_tool --setuid ${uid}`, { env: { PATH: modDir }}).then((result) => {
+async function setManager(uid, manager) {
+    await exec(`uid_tool --setuid ${uid} && { kill -9 $(busybox pidof ${manager}) || true; }
+        `, { env: { PATH: `$PATH:${modDir}:${ksuDir}/bin` }}).then((result) => {
         if (result.errno !== 0) {
             toast("Failed to crown manager: " + result.stderr);
         } else {
@@ -122,7 +123,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.querySelectorAll('md-radio').forEach(radio => {
             if (!radio.checked) return;
             saveManager(saveSwitch.selected ? radio.value : null);
-            setManager(radio.value);
+            setManager(radio.value, radio.id);
         });
     }
 });
