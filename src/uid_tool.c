@@ -22,15 +22,6 @@ __attribute__((always_inline))
 static int dumb_str_to_appuid(const char *str)
 {
 	int uid = 0;
-
-	// dereference to see if user supplied 5 digits
-	if ( !*(str + 4) )
-		return 0;
-	
-	// dereference to see if its a null terminator
-	if ( *(str + 5) )
-		return 0;
-
 	int i = 4;
 	int m = 1;
 
@@ -90,7 +81,8 @@ int main(int argc, char *argv[])
 	if (!argv[1])
 		goto show_usage;
 
-	if (!!argv[2] && !argv[3] && !memcmp(argv[1], "--setuid", strlen("--setuid") + 1)) {
+	if (!memcmp(argv[1], "--setuid", strlen("--setuid") + 1) && 
+		!!argv[2] && !!argv[2][4] && !argv[2][5] && !argv[3]) {
 		int magic1 = 0xDEADBEEF;
 		int magic2 = 10006;
 		uintptr_t arg = 0;
@@ -109,7 +101,7 @@ int main(int argc, char *argv[])
 		goto fail;
 	}
 
-	if (!argv[2] && !memcmp(argv[1], "--getuid", strlen("--getuid") + 1)) {
+	if (!memcmp(argv[1], "--getuid", strlen("--getuid") + 1) && !argv[2]) {
 		unsigned int fd = 0;
 		
 		// we dont care about closing the fd, it gets released on exit automatically
