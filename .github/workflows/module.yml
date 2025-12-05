@@ -14,11 +14,10 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: grab zig
-        run: |
-          curl -L https://ziglang.org/builds/zig-x86_64-linux-0.16.0-dev.1484+d0ba6642b.tar.xz -o zig.tar.xz
-          tar -xf zig.tar.xz
-          mv zig-* zig
+      - name: Setup zig
+        uses: mlugg/setup-zig@v2
+        with:
+          version: master
 
       - name: grab sstrip from ELFkickers
         run: |
@@ -33,15 +32,16 @@ jobs:
           pwd
           chmod +x sstrip
 
-          ./zig/zig cc -target aarch64-linux -s -Oz -static -Wl,--gc-sections,-z,norelro -fno-unwind-tables -Wl,--entry=__start src/uid_tool.c -o uid_tool
+          cd src
+          zig cc -target aarch64-linux -s -Oz -static -Wl,--gc-sections,-z,norelro -fno-unwind-tables -Wl,--entry=__start uid_tool.c -o uid_tool
 
           wc -c uid_tool
           
-          ./sstrip -z uid_tool
+          ../sstrip -z uid_tool
           
           wc -c uid_tool
           file uid_tool
-          mv uid_tool module/uid_tool
+          mv uid_tool ../module/uid_tool
 
       - name: Build WebUI
         run: |
