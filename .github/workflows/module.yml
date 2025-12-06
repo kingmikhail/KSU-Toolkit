@@ -33,15 +33,15 @@ jobs:
           chmod +x sstrip
 
           cd src
-          zig cc -target aarch64-linux -s -Oz -static -Wl,--gc-sections,-z,norelro -fno-unwind-tables -Wl,--entry=__start uid_tool.c -o uid_tool
+          zig cc -target aarch64-linux -s -Oz -static -Wl,--gc-sections,-z,norelro -fno-unwind-tables -Wl,--entry=__start toolkit.c -o toolkit
 
-          wc -c uid_tool
+          wc -c toolkit
           
-          ../sstrip -z uid_tool
+          ../sstrip -z toolkit
           
-          wc -c uid_tool
-          file uid_tool
-          mv uid_tool ../module/uid_tool
+          wc -c toolkit
+          file toolkit
+          mv toolkit ../module/toolkit
 
       - name: Build WebUI
         run: |

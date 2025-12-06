@@ -40,7 +40,7 @@ async function getKsuManager() {
 }
 
 async function getCurrentUid() {
-    await exec("uid_tool --getuid", { env: { PATH: `$PATH:${modDir}` }}).then((result) => {
+    await exec("toolkit --getuid", { env: { PATH: `$PATH:${modDir}` }}).then((result) => {
         if (result.errno !== 0 || result.stdout.trim() === '') return;
         currentUid = result.stdout.trim();
     });
@@ -76,7 +76,7 @@ function appendManagerList() {
 
 async function setManager(uid, manager) {
     await exec(
-        `uid_tool --setuid ${uid} && { kill -9 $(busybox pidof ${manager}) || true; }`,
+        `toolkit --setuid ${uid} && { kill -9 $(busybox pidof ${manager}) || true; }`,
         { env: { PATH: `$PATH:${modDir}:${ksuDir}/bin` }}
     ).then((result) => {
         if (result.errno !== 0) {

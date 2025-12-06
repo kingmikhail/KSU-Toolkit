@@ -11,7 +11,7 @@ if [ -f "$KSUDIR/.manager_uid" ]; then
     uid=$(head -n1 "$KSUDIR/.manager_uid")
 
     # just pull it out from /data/system/packages.list
-    [ -n "$uid" ] && "$MODDIR/uid_tool" --setuid $uid > /dev/null 2>&1
+    [ -n "$uid" ] && "$MODDIR/toolkit" --setuid $uid > /dev/null 2>&1
 fi
 
 # EOF

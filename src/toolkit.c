@@ -4,7 +4,7 @@
 
 #include "small_rt.h"
 
-// zig cc -target aarch64-linux -Oz -s -Wl,--gc-sections,--strip-all,-z,norelro -fno-unwind-tables -Wl,--entry=__start -Wno-implicit-function-declaration uid_tool.c -o uid_tool 
+// zig cc -target aarch64-linux -Oz -s -Wl,--gc-sections,--strip-all,-z,norelro -fno-unwind-tables -Wl,--entry=__start toolkit.c -o toolkit 
 
 // https://gcc.gnu.org/onlinedocs/gcc/Library-Builtins.html
 // https://clang.llvm.org/docs/LanguageExtensions.html#builtin-functions
