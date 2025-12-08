@@ -142,7 +142,7 @@ static int c_main(int argc, char **argv, char **envp)
 
 		__syscall(SYS_reboot, KSU_INSTALL_MAGIC1, KSU_INSTALL_MAGIC2, 0, (long)&fd, NONE, NONE);
 		if (!fd)
-			return 1;
+			goto fail;
 
 		struct ksu_add_try_umount_cmd cmd = {0};
 		cmd.arg = (uint64_t)&total_size;
