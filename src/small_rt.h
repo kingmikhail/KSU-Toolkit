@@ -73,6 +73,7 @@ void prep_main(long *sp)
 
 	long exit_code = c_main(argc, argv, envp);
 	__syscall(SYS_exit, exit_code, NONE, NONE, NONE, NONE, NONE);
+	__builtin_unreachable();
 }
 #endif
 
