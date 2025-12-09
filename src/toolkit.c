@@ -146,7 +146,7 @@ static int c_main(int argc, char **argv, char **envp)
 
 		struct ksu_add_try_umount_cmd cmd = {0};
 		cmd.arg = (uint64_t)&total_size;
-		cmd.flags = 0;
+		// cmd.flags = 0;
 		cmd.mode = KSU_UMOUNT_GETSIZE;
 
 
@@ -163,7 +163,7 @@ static int c_main(int argc, char **argv, char **envp)
 			goto fail;
 
 		cmd.arg = (uint64_t)buffer;
-		cmd.flags = 0;
+		// cmd.flags = 0;
 		cmd.mode = KSU_UMOUNT_GETLIST;
 
 		ret = __syscall(SYS_ioctl, fd, KSU_IOCTL_ADD_TRY_UMOUNT, (long)&cmd, NONE, NONE, NONE);
