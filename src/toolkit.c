@@ -7,7 +7,6 @@
 // zig cc -target aarch64-linux -Oz -s -Wl,--gc-sections,--strip-all,-z,norelro -fno-unwind-tables -Wl,--entry=__start toolkit.c -o toolkit 
 
 #define alloca __builtin_alloca
-#define memcmp __builtin_memcmp
 
 // get uid from kernelsu
 struct ksu_get_manager_uid_cmd {
@@ -29,6 +28,34 @@ struct ksu_add_try_umount_cmd {
 #define KSU_INSTALL_MAGIC2 0xCAFEBABE
 
 #define NONE 0
+
+/*
+ * strnmatch, test two strings if they match up to n len
+ *
+ * caller is reposnible for sanity! no \0 check!
+ * returns: 0 = match, 1 = not match
+ *
+ * Usage examples:
+ * for strcmp like behavior, strnmatch(x, y, strlen(y) + 1) (+1 for \0)
+ * for strstarts like behavior strnmatch(x, y, strlen(y))
+ *  
+ */
+__attribute__((noinline))
+static int strnmatch(const char *a, const char *b, unsigned int count)
+{
+	// og condition was like *a && (*a == *b) && count > 0
+	while (count > 0) {
+		// if they arent equal
+		if (*a != *b) 
+			return 1;
+		a++;
+		b++;
+		count --;
+	}
+
+	// we reach here if they match
+	return 0;
+}
 
 __attribute__((noinline))
 static unsigned long strlen(const char *str)
@@ -107,7 +134,7 @@ static int c_main(int argc, char **argv, char **envp)
 	if (!argv[1])
 		goto show_usage;
 
-	if (!memcmp(argv[1], "--setuid", strlen("--setuid") + 1) && 
+	if (!strnmatch(argv[1], "--setuid", strlen("--setuid") + 1) && 
 		!!argv[2] && !!argv[2][4] && !argv[2][5] && !argv[3]) {
 		int magic1 = 0xDEADBEEF;
 		int magic2 = 10006;
@@ -127,7 +154,7 @@ static int c_main(int argc, char **argv, char **envp)
 		goto fail;
 	}
 
-	if (!memcmp(argv[1], "--getuid", strlen("--getuid") + 1) && !argv[2]) {
+	if (!strnmatch(argv[1], "--getuid", strlen("--getuid") + 1) && !argv[2]) {
 		
 		// we dont care about closing the fd, it gets released on exit automatically
 		__syscall(SYS_reboot, KSU_INSTALL_MAGIC1, KSU_INSTALL_MAGIC2, 0, (long)&fd, NONE, NONE);
@@ -145,7 +172,7 @@ static int c_main(int argc, char **argv, char **envp)
 		return dumb_print_appuid(cmd.uid);
 	}
 
-	if (!memcmp(argv[1], "--getlist", strlen("--getlist") + 1) && !argv[2]) {
+	if (!strnmatch(argv[1], "--getlist", strlen("--getlist") + 1) && !argv[2]) {
 		unsigned long total_size = 0;
 
 		__syscall(SYS_reboot, KSU_INSTALL_MAGIC1, KSU_INSTALL_MAGIC2, 0, (long)&fd, NONE, NONE);
