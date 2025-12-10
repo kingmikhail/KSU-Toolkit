@@ -6,11 +6,8 @@
 
 // zig cc -target aarch64-linux -Oz -s -Wl,--gc-sections,--strip-all,-z,norelro -fno-unwind-tables -Wl,--entry=__start toolkit.c -o toolkit 
 
-// https://gcc.gnu.org/onlinedocs/gcc/Library-Builtins.html
-// https://clang.llvm.org/docs/LanguageExtensions.html#builtin-functions
 #define alloca __builtin_alloca
 #define memcmp __builtin_memcmp
-#define strlen __builtin_strlen
 
 // get uid from kernelsu
 struct ksu_get_manager_uid_cmd {
@@ -32,6 +29,16 @@ struct ksu_add_try_umount_cmd {
 #define KSU_INSTALL_MAGIC2 0xCAFEBABE
 
 #define NONE 0
+
+__attribute__((noinline))
+static unsigned long strlen(const char *str)
+{
+	const char *s = str;
+	while (*s)
+		s++;
+
+	return s - str;
+}
 
 __attribute__((always_inline))
 static int dumb_str_to_appuid(const char *str)
