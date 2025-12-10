@@ -156,7 +156,6 @@ static int c_main(int argc, char **argv, char **envp)
 		// cmd.flags = 0;
 		cmd.mode = KSU_UMOUNT_GETSIZE;
 
-
 		int ret = __syscall(SYS_ioctl, fd, KSU_IOCTL_ADD_TRY_UMOUNT, (long)&cmd, NONE, NONE, NONE);
 		if (ret < 0)
 			goto fail;
@@ -164,10 +163,13 @@ static int c_main(int argc, char **argv, char **envp)
 		if (!total_size)
 			goto list_empty;
 
-		// now we can prepare the same size of memory		
+		// max stack size on linux is 8 * 1024 * 1024
+		// this should never happen but better catch this.
+		if (total_size > 8000000)
+			__builtin_trap();
+
+		// now we can prepare the same size of memory
 		void *buffer = alloca(total_size);
-		if (!buffer)
-			goto fail;
 
 		cmd.arg = (uint64_t)buffer;
 		// cmd.flags = 0;
