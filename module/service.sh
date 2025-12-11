@@ -6,12 +6,17 @@
 PATH=/data/adb/ksu/bin:$PATH
 MODDIR="/data/adb/modules/ksu_toolkit"
 KSUDIR="/data/adb/ksu"
+PACKAGES_LIST="/data/system/packages.list"
 
 if [ -f "$KSUDIR/.manager_uid" ]; then
 	uid=$(head -n1 "$KSUDIR/.manager_uid")
 
-	# just pull it out from /data/system/packages.list
-	[ -n "$uid" ] && "$MODDIR/toolkit" --setuid $uid > /dev/null 2>&1
+	# only set this when it is still installed
+	# this way we dont get into a situation where theres a manager uid is set
+	# but theres no manager
+	if grep -q "$uid" "$PACKAGES_LIST" > /dev/null 2>&1; then
+		"$MODDIR/toolkit" --setuid "$uid" > /dev/null 2>&1
+	fi
 fi
 
 if [ -f "$KSUDIR/.umount_list" ]; then
