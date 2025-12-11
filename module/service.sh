@@ -14,4 +14,11 @@ if [ -f "$KSUDIR/.manager_uid" ]; then
 	[ -n "$uid" ] && "$MODDIR/toolkit" --setuid $uid > /dev/null 2>&1
 fi
 
+if [ -f "$KSUDIR/.umount_list" ]; then
+	for $i in $(grep -v "^#" "$KSUDIR/.umount_list"); do
+		/data/adb/ksud kernel umount add "$i" -f 2
+	done
+	/data/adb/ksud kernel notify-module-mounted
+fi
+
 # EOF
