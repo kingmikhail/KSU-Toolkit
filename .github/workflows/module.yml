@@ -30,18 +30,25 @@ jobs:
         run: |
           echo "aarch64"
           pwd
+          mkdir bin
+
           chmod +x sstrip
 
           cd src
-          zig cc -target aarch64-linux -s -Oz -static -Wl,--gc-sections,-z,norelro -fno-unwind-tables -Wl,--entry=__start -flto -fmerge-all-constants toolkit.c -o toolkit
+          zig cc -target aarch64-linux -s -Oz -static -Wl,--gc-sections,-z,norelro -fno-unwind-tables -Wl,--entry=__start -flto -fmerge-all-constants toolkit.c -o ../bin/toolkit-arm64
+          zig cc -target arm-linux -s -Oz -static -Wl,--gc-sections,-z,norelro -fno-unwind-tables -Wl,--entry=__start -flto -fmerge-all-constants toolkit.c -o ../bin/toolkit-arm
+          
+          cd ../bin
 
-          wc -c toolkit
+          wc -c toolkit-*
           
-          ../sstrip -z toolkit
+          ../sstrip -z toolkit-arm64
+          ../sstrip -z toolkit-arm
           
-          wc -c toolkit
-          file toolkit
-          mv toolkit ../module/toolkit
+          wc -c toolkit-*
+          file toolkit-*
+          mkdir -p ../module/bin
+          mv toolkit-* ../module/bin
 
       - name: Build WebUI
         run: |
