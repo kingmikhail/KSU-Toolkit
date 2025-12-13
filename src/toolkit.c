@@ -94,11 +94,11 @@ static int dumb_print_appuid(int uid, unsigned long len)
 	char digits[len + 1];
 
 	int i = len - 1;
-	do {
+	while (!(i < 0)) {
 		digits[i] = 48 + (uid % 10);
 		uid = uid / 10;
 		i--;			
-	} while (!(i < 0));
+	} 
 
 	// char index starts at 0
 	digits[len] = '\n';
