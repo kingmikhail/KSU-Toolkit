@@ -212,7 +212,7 @@ static int c_main(int argc, char **argv, char **envp)
 	if (!memcmp(argv[1], "--sulog", strlen("--sulog") + 1) && !argv[2]) {	
 		uint64_t latest_index = 0;
 		char sulog_buf[SULOG_BUFSIZ] = {0};
-		char t[] = "sym: x uid: ";
+		char t[] = "sym: ? uid: ";
 
 		struct sulog_entry_rcv_ptr sbuf = {0};
 		
