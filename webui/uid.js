@@ -17,7 +17,7 @@ async function getKsuManager() {
         result.stdout.on('data', (data) => packages.push(data.trim()));
         result.on('exit', async () => {
             try {
-                const pmPackages = await listPackages();
+                const pmPackages = await listPackages("user");
                 packages = packages.filter(val => pmPackages.includes(val)).sort();
                 const pkgInfos = await getPackagesInfo(packages);
                 pkgInfos.forEach(pkg => {
