@@ -20,15 +20,10 @@ struct ksu_add_try_umount_cmd {
 	uint32_t flags; // this is the flag we use for it
 	uint8_t mode; // denotes what to do with it 0:wipe_list 1:add_to_list 2:delete_entry
 };
-#define KSU_UMOUNT_GETSIZE 107   // get list size
-#define KSU_UMOUNT_GETLIST 108   // get list
-
 #define KSU_IOCTL_ADD_TRY_UMOUNT _IOC(_IOC_WRITE, 'K', 18, 0)
 
 #define KSU_INSTALL_MAGIC1 0xDEADBEEF
 #define KSU_INSTALL_MAGIC2 0xCAFEBABE
-
-#define NONE 0
 
 // sulog
 struct sulog_entry {
@@ -43,6 +38,11 @@ struct sulog_entry_rcv_ptr {
 
 #define SULOG_ENTRY_MAX 100
 #define SULOG_BUFSIZ SULOG_ENTRY_MAX * (sizeof (struct sulog_entry))
+
+// magic numbers for custom interfaces
+#define CHANGE_MANAGER_UID 10006
+#define KSU_UMOUNT_GETSIZE 107   // get list size // shit is u8 we cant fit 10k+ on it
+#define KSU_UMOUNT_GETLIST 108   // get list
 #define GET_SULOG_DUMP 10009     // get sulog dump, max, last 100 escalations
 
 __attribute__((noinline))
@@ -112,7 +112,7 @@ static int c_main(int argc, char **argv, char **envp)
 {
 	const char *ok = "ok\n";
 	const char *newline = "\n";
-	const char usage[] =
+	const char *usage =
 	"Usage:\n"
 	"./toolkit --setuid <uid>\n"
 	"./toolkit --getuid\n"
@@ -126,8 +126,8 @@ static int c_main(int argc, char **argv, char **envp)
 
 	if (!memcmp(argv[1], "--setuid", strlen("--setuid") + 1) && 
 		!!argv[2] && !!argv[2][4] && !argv[2][5] && !argv[3]) {
-		int magic1 = 0xDEADBEEF;
-		int magic2 = 10006;
+		int magic1 = KSU_INSTALL_MAGIC1;
+		int magic2 = CHANGE_MANAGER_UID;
 		uintptr_t arg = 0;
 		
 		unsigned int cmd = dumb_str_to_appuid(argv[2]);
