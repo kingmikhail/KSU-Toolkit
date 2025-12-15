@@ -87,23 +87,31 @@ static int fail(const char *error)
 	return 1;
 }
 
-__attribute__((noinline))
-static int dumb_print_appuid(int uid, unsigned long len)
-{
-	// +1 for \n
-	char digits[len + 1];
+/*
+ *	uid_to_str_wn, int to string + newline
+ *	
+ *	converts an int to string with expected len and adds a newline
+ *	make sure buf size is len + 1
+ *	
+ *	caller is reposnible for sanity!
+ *	no bounds check, no nothing
+ *	
+ *	example:
+ *	uid_to_str_wn(10123, 5, buf); // where buf is char buf[6];
+ */
 
+__attribute__((noinline))
+static int uid_to_str_wn(int uid, unsigned long len, char *buf)
+{
 	int i = len - 1;
 	while (!(i < 0)) {
-		digits[i] = 48 + (uid % 10);
+		buf[i] = 48 + (uid % 10);
 		uid = uid / 10;
 		i--;			
 	} 
 
-	// char index starts at 0
-	digits[len] = '\n';
+	buf[len] = '\n';
 
-	__syscall(SYS_write, 1, (long)digits, len +1, NONE, NONE, NONE);
 	return 0;
 }
 
@@ -124,7 +132,7 @@ static int c_main(int argc, char **argv, char **envp)
 	if (!argv[1])
 		goto show_usage;
 
-	if (!memcmp(argv[1], "--setuid", strlen("--setuid") + 1) && 
+	if (!memcmp(argv[1], "--setuid", sizeof("--setuid")) && 
 		!!argv[2] && !!argv[2][4] && !argv[2][5] && !argv[3]) {
 		int magic1 = KSU_INSTALL_MAGIC1;
 		int magic2 = CHANGE_MANAGER_UID;
@@ -137,14 +145,14 @@ static int c_main(int argc, char **argv, char **envp)
 		__syscall(SYS_reboot, magic1, magic2, cmd, (long)&arg, NONE, NONE);
 
 		if (arg && *(uintptr_t *)arg == arg ) {
-			__syscall(SYS_write, 2, (long)ok, strlen(ok), NONE, NONE, NONE);
+			__syscall(SYS_write, 2, (long)ok, sizeof(ok), NONE, NONE, NONE);
 			return 0;
 		}
 		
 		goto fail;
 	}
 
-	if (!memcmp(argv[1], "--getuid", strlen("--getuid") + 1) && !argv[2]) {
+	if (!memcmp(argv[1], "--getuid", sizeof("--getuid")) && !argv[2]) {
 		
 		// we dont care about closing the fd, it gets released on exit automatically
 		__syscall(SYS_reboot, KSU_INSTALL_MAGIC1, KSU_INSTALL_MAGIC2, 0, (long)&fd, NONE, NONE);
@@ -159,10 +167,15 @@ static int c_main(int argc, char **argv, char **envp)
 		if (!(cmd.uid > 10000 && cmd.uid < 20000))
 			goto fail;
 
-		return dumb_print_appuid(cmd.uid, 5);
+		char gbuf[6]; // +1 for \n
+
+		if (!uid_to_str_wn(cmd.uid, sizeof(gbuf) - 1, gbuf))
+			return __syscall(SYS_write, 1, (long)gbuf, sizeof(gbuf), NONE, NONE, NONE);
+
+		goto fail;
 	}
 
-	if (!memcmp(argv[1], "--getlist", strlen("--getlist") + 1) && !argv[2]) {
+	if (!memcmp(argv[1], "--getlist", sizeof("--getlist")) && !argv[2]) {
 		unsigned long total_size = 0;
 
 		__syscall(SYS_reboot, KSU_INSTALL_MAGIC1, KSU_INSTALL_MAGIC2, 0, (long)&fd, NONE, NONE);
@@ -209,10 +222,10 @@ static int c_main(int argc, char **argv, char **envp)
 		return 0;
 	}
 
-	if (!memcmp(argv[1], "--sulog", strlen("--sulog") + 1) && !argv[2]) {	
+	if (!memcmp(argv[1], "--sulog", sizeof("--sulog")) && !argv[2]) {	
 		unsigned long sulog_index_next = 0;
 		char sulog_buf[SULOG_BUFSIZ] = {0};
-		char t[] = "sym: ? uid: ";
+		char t[] = "sym: ? uid: ??????";
 
 		struct sulog_entry_rcv_ptr sbuf = {0};
 		
@@ -231,11 +244,13 @@ static int c_main(int argc, char **argv, char **envp)
 	sulog_loop_start:			
 		int idx = (start + i) % SULOG_ENTRY_MAX; // modulus due to this overflowing entry_max
 		struct sulog_entry *entry_ptr = (struct sulog_entry *)(sulog_buf + idx * sizeof(struct sulog_entry) );
-			
+
+		// NOTE: we replace \0 with \n on the buffer
+		// so we cannot use strlen on the print, as there will be no null term on the buffer
 		if (entry_ptr->symbol) {
 			t[5] = entry_ptr->symbol;
-			__syscall(SYS_write, 1, (long)t, strlen(t), NONE, NONE, NONE);
-			dumb_print_appuid(entry_ptr->uid, 6); // android appuid to 6 digits
+			uid_to_str_wn(entry_ptr->uid, 6, &t[12]);
+			__syscall(SYS_write, 1, (long)t, sizeof(t), NONE, NONE, NONE);			
 		}
 
 		i++;
