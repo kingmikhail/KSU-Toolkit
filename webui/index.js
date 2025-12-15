@@ -86,6 +86,7 @@ function setupUidPageListener() {
             if (!radio.checked) return;
             uidModule.saveManager(saveSwitch.selected ? radio.value : null);
             uidModule.setManager(radio.value, radio.id);
+            crownBtn.classList.remove('show');
         });
     }
 }
