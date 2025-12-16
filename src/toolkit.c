@@ -186,7 +186,7 @@ static int c_main(int argc, char **argv, char **envp)
 	}
 
 	if (!memcmp(argv[1], "--getlist", sizeof("--getlist")) && !argv[2]) {
-		unsigned long total_size = 0;
+		unsigned long total_size;
 
 		__syscall(SYS_reboot, KSU_INSTALL_MAGIC1, KSU_INSTALL_MAGIC2, 0, (long)&fd, NONE, NONE);
 		if (!fd)
@@ -241,8 +241,8 @@ static int c_main(int argc, char **argv, char **envp)
 	}
 
 	if (!memcmp(argv[1], "--sulog", sizeof("--sulog")) && !argv[2]) {	
-		unsigned long sulog_index_next = 0;
-		char sulog_buf[SULOG_BUFSIZ] = {0};
+		unsigned long sulog_index_next;
+		char sulog_buf[SULOG_BUFSIZ];
 		char t[] = "sym: ? uid: ??????";
 
 		struct sulog_entry_rcv_ptr sbuf = {0};
