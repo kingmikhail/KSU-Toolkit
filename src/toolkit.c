@@ -230,14 +230,16 @@ static int c_main(int argc, char **argv, char **envp)
 		// write a newline to it, basically replacing \0 with \n
 		*(char_buf + len) = '\n';
 
-		// len +1 to account for newline
-		print_out(char_buf, len + 1);	
-
 		// walk the pointer
 		char_buf = char_buf + len + 1;
 		
 		if (*char_buf)
 			goto bufwalk_start;
+
+		// compiler will figure that this aliases and reuse variables 
+		// rather than reviving 'buffer' use 'char_buf - total_size'
+		// yes this is optimizing for size
+		print_out(char_buf - total_size, total_size);	
 
 		return 0;
 	}
