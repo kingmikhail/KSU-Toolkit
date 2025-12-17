@@ -223,19 +223,21 @@ static int c_main(int argc, char **argv, char **envp)
 		// now we pointerwalk
 		char *char_buf = (char *)buffer;
 
-		while (*char_buf) {
-			// get entry's string length first
-			int len = strlen(char_buf);
+	bufwalk_start:
+		// get entry's string length first
+		int len = strlen(char_buf);
 
-			// write a newline to it, basically replacing \0 with \n
-			*(char_buf + len) = '\n';
+		// write a newline to it, basically replacing \0 with \n
+		*(char_buf + len) = '\n';
 
-			// len +1 to account for newline
-			print_out(char_buf, len + 1);			
+		// len +1 to account for newline
+		print_out(char_buf, len + 1);	
 
-			// walk the pointer
-			char_buf = char_buf + len + 1;
-		}
+		// walk the pointer
+		char_buf = char_buf + len + 1;
+		
+		if (*char_buf)
+			goto bufwalk_start;
 
 		return 0;
 	}
