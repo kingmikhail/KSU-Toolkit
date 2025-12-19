@@ -77,20 +77,19 @@ __attribute__((always_inline))
 static int dumb_str_to_appuid(const char *str)
 {
 	int uid = 0;
-	int i = 4;
-	int m = 1;
+#if 0
+ex. 10281
+	1
+	1 * 10 + 0 = 10
+	10 * 10 + 2 = 102
+	102 * 10 + 8 = 1028
+	1028 * 10 + 1 = 10281
+#endif
 
-	do {
-		// llvm actually has an optimized isdigit
-		// just not prefixed with __builtin
-		// code generated is the same size, so better use it
-		if (!isdigit(str[i]))
-			return 0;
-
-		uid = uid + ( *(str + i) - 48 ) * m;
-		m = m * 10;
-		i--;
-	} while (!(i < 0));
+	while(*str && isdigit(*str)) {
+		uid = uid * 10 + (*str - 48);
+		str = str + 1;
+	}
 
 	if (!(uid > 10000 && uid < 20000))
 		return 0;
@@ -118,7 +117,7 @@ static void uid_to_str_wn(int uid, unsigned long len, char *buf)
 	while (!(i < 0)) {
 		buf[i] = 48 + (uid % 10);
 		uid = uid / 10;
-		i--;			
+		i--;
 	} 
 
 	buf[len] = '\n';
