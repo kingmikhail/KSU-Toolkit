@@ -5,6 +5,6 @@
 # This is free software; you can redistribute it and/or modify it under the terms of The Unlicense.
 KSUDIR="/data/adb/ksu"
 
-rm -rf "$KSUDIR/.manager_uid"
+rm -rf "$KSUDIR/.manager_uid" "$KSUDIR/.umount_list"
 
 rm "$KSUDIR/bin/toolkit"
