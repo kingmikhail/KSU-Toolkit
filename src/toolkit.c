@@ -138,6 +138,48 @@ static void long_to_str(long number, unsigned long len, char *buf)
 	return;
 }
 
+static inline int sulogv1()
+{
+	unsigned long sulog_index_next;
+	char sulogv1_buf[SULOGV1_BUFSIZ];
+	char t[] = "sym: ? uid: ??????";
+	t[strlen(t)] = '\n';
+
+	struct sulogv1_entry_rcv_ptr sbuf = {0};
+	
+	sbuf.int_ptr = (uint64_t)&sulog_index_next;
+	sbuf.buf_ptr = (uint64_t)sulogv1_buf;
+
+	__syscall(SYS_reboot, KSU_INSTALL_MAGIC1, GET_SULOG_DUMP, 0, (long)&sbuf, NONE, NONE);
+	
+	// sulog_index_next is the oldest entry!
+	// and sulog_index_next -1 is the newest entry
+	// we start listing from the oldest entry
+	int start = sulog_index_next;
+
+	int i = 0;
+
+	sulogv1_loop_start:
+	int idx = (start + i) % SULOGV1_ENTRY_MAX; // modulus due to this overflowing entry_max
+	struct sulogv1_entry *entry_ptr = (struct sulogv1_entry *)(sulogv1_buf + idx * sizeof(struct sulogv1_entry) );
+
+	// NOTE: we replace \0 with \n on the buffer
+	// so we cannot use strlen on the print, as there will be no null term on the buffer
+	if (entry_ptr->symbol) {
+		t[5] = entry_ptr->symbol;
+		long_to_str(entry_ptr->uid, 6, &t[12]);
+		t[strlen(t)] = '\n';
+		print_out(t, sizeof(t));
+	}
+
+	i++;
+
+	if (i < SULOGV1_ENTRY_MAX)
+		goto sulogv1_loop_start;
+
+	return 0;
+}
+
 __attribute__((always_inline))
 static int c_main(int argc, char **argv, char **envp)
 {
@@ -147,8 +189,7 @@ static int c_main(int argc, char **argv, char **envp)
 	"./toolkit --setuid <uid>\n"
 	"./toolkit --getuid\n"
 	"./toolkit --getlist\n"
-	"./toolkit --sulog\n"
-	"./toolkit --sulog2\n";
+	"./toolkit --sulog\n";
 
 	unsigned int fd = 0;
 	char *argv1 = argv[1];
@@ -262,47 +303,6 @@ static int c_main(int argc, char **argv, char **envp)
 	}
 
 	if (!memcmp(argv1, "--sulog", sizeof("--sulog")) && !argv2) {
-		unsigned long sulog_index_next;
-		char sulog_buf[SULOGV1_BUFSIZ];
-		char t[] = "sym: ? uid: ??????";
-		t[strlen(t)] = '\n';
-
-		struct sulogv1_entry_rcv_ptr sbuf = {0};
-		
-		sbuf.int_ptr = (uint64_t)&sulog_index_next;
-		sbuf.buf_ptr = (uint64_t)sulog_buf;
-
-		__syscall(SYS_reboot, KSU_INSTALL_MAGIC1, GET_SULOG_DUMP, 0, (long)&sbuf, NONE, NONE);
-		
-		// sulog_index_next is the oldest entry!
-		// and sulog_index_next -1 is the newest entry
-		// we start listing from the oldest entry
-		int start = sulog_index_next;
-
-		int i = 0;
-
-	sulogv1_loop_start:			
-		int idx = (start + i) % SULOGV1_ENTRY_MAX; // modulus due to this overflowing entry_max
-		struct sulogv1_entry *entry_ptr = (struct sulogv1_entry *)(sulog_buf + idx * sizeof(struct sulogv1_entry) );
-
-		// NOTE: we replace \0 with \n on the buffer
-		// so we cannot use strlen on the print, as there will be no null term on the buffer
-		if (entry_ptr->symbol) {
-			t[5] = entry_ptr->symbol;
-			long_to_str(entry_ptr->uid, 6, &t[12]);
-			t[strlen(t)] = '\n';
-			print_out(t, sizeof(t));
-		}
-
-		i++;
-
-		if (i < SULOGV1_ENTRY_MAX)
-			goto sulogv1_loop_start;
-
-		return 0;
-	}
-
-	if (!memcmp(argv1, "--sulog2", sizeof("--sulog2")) && !argv2) {
 		uint32_t sulog_index_next;
 		uint32_t sulog_uptime = 0;
 		char sulog_buf[SULOG_BUFSIZ];
@@ -326,7 +326,7 @@ static int c_main(int argc, char **argv, char **envp)
 		int i = 0;
 
 		if (!(*(uintptr_t *)&sbuf == (uintptr_t)&sbuf) )
-			goto fail;
+			return sulogv1(); // attempt v1
 
 		long_to_str(sulog_uptime, 11, &uptime_text[8]);
 		print_out(uptime_text, sizeof(uptime_text));
