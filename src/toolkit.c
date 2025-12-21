@@ -25,19 +25,19 @@ struct ksu_add_try_umount_cmd {
 #define KSU_INSTALL_MAGIC1 0xDEADBEEF
 #define KSU_INSTALL_MAGIC2 0xCAFEBABE
 
-// sulog
-struct sulog_entry {
+// sulog v1
+struct sulogv1_entry {
 	uint8_t symbol;
 	uint32_t uid; // mebbe u16?
 } __attribute__((packed));
 
-struct sulog_entry_rcv_ptr {
+struct sulogv1_entry_rcv_ptr {
 	uint64_t int_ptr; // send index here
 	uint64_t buf_ptr; // send buf here
 };
 
-#define SULOG_ENTRY_MAX 100
-#define SULOG_BUFSIZ SULOG_ENTRY_MAX * (sizeof (struct sulog_entry))
+#define SULOGV1_ENTRY_MAX 100
+#define SULOGV1_BUFSIZ SULOGV1_ENTRY_MAX * (sizeof (struct sulogv1_entry))
 
 // magic numbers for custom interfaces
 #define CHANGE_MANAGER_UID 10006
@@ -248,10 +248,10 @@ static int c_main(int argc, char **argv, char **envp)
 
 	if (!memcmp(argv1, "--sulog", sizeof("--sulog")) && !argv2) {	
 		unsigned long sulog_index_next;
-		char sulog_buf[SULOG_BUFSIZ];
+		char sulog_buf[SULOGV1_BUFSIZ];
 		char t[] = "sym: ? uid: ??????";
 
-		struct sulog_entry_rcv_ptr sbuf = {0};
+		struct sulogv1_entry_rcv_ptr sbuf = {0};
 		
 		sbuf.int_ptr = (uint64_t)&sulog_index_next;
 		sbuf.buf_ptr = (uint64_t)sulog_buf;
@@ -265,9 +265,9 @@ static int c_main(int argc, char **argv, char **envp)
 
 		int i = 0;
 
-	sulog_loop_start:			
-		int idx = (start + i) % SULOG_ENTRY_MAX; // modulus due to this overflowing entry_max
-		struct sulog_entry *entry_ptr = (struct sulog_entry *)(sulog_buf + idx * sizeof(struct sulog_entry) );
+	sulogv1_loop_start:			
+		int idx = (start + i) % SULOGV1_ENTRY_MAX; // modulus due to this overflowing entry_max
+		struct sulogv1_entry *entry_ptr = (struct sulogv1_entry *)(sulog_buf + idx * sizeof(struct sulogv1_entry) );
 
 		// NOTE: we replace \0 with \n on the buffer
 		// so we cannot use strlen on the print, as there will be no null term on the buffer
@@ -279,8 +279,8 @@ static int c_main(int argc, char **argv, char **envp)
 
 		i++;
 
-		if (i < SULOG_ENTRY_MAX)
-			goto sulog_loop_start;
+		if (i < SULOGV1_ENTRY_MAX)
+			goto sulogv1_loop_start;
 
 		return 0;
 	}
