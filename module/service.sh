@@ -50,8 +50,10 @@ if [ -f "$KSUDIR/.umount_list" ]; then
 
 	# we do this since rezygisk will disable it
 	# I wonder who did it bro
-	/data/adb/ksud feature set 1 1
-	apply_sepolicy_rule
+	if [ "$(grep -cv "^#" "$KSUDIR/.umount_list")" -gt 0  ]; then
+		/data/adb/ksud feature set 1 1
+		apply_sepolicy_rule
+	fi
 fi
 
 # EOF
