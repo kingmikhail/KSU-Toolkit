@@ -19,11 +19,39 @@ if [ -f "$KSUDIR/.manager_uid" ]; then
 	fi
 fi
 
+# wait for boot-complete
+until [ "$(getprop sys.boot_completed)" = "1" ]; do
+	sleep 1
+done
+
+apply_sepolicy_rule()
+{
+# if no zn, we need an extra rule to umount stuff from /data
+# for shit like revanced
+zygisksu_dir="/data/adb/modules/zygisksu"
+toolkit_rule="/dev/ksu_toolkit_sepolicy"
+if [ ! -d "$zygisksu_dir" ] || [ -f "$zygisksu_dir/remove" ] || 
+	[ -f "$zygisksu_dir/disable" ] || [ ! -f "/data/adb/zygisksu/denylist_enforce" ]; then
+
+	echo "ksu_toolkit: applying umount sepolicy rule" >> /dev/kmsg
+
+	# from susfs 1.2.2
+	echo "allow zygote labeledfs filesystem unmount" > "$toolkit_rule"
+	/data/adb/ksud sepolicy apply "$toolkit_rule"
+	busybox rm "$toolkit_rule"
+fi
+} # apply_sepolicy_rule
+
 if [ -f "$KSUDIR/.umount_list" ]; then
 	for i in $(grep -v "^#" "$KSUDIR/.umount_list"); do
 		/data/adb/ksud kernel umount add "$i" -f 2
 	done
 	/data/adb/ksud kernel notify-module-mounted
+
+	# we do this since rezygisk will disable it
+	# I wonder who did it bro
+	/data/adb/ksud feature set 1 1
+	apply_sepolicy_rule
 fi
 
 # EOF
