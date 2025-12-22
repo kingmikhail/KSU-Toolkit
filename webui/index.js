@@ -129,8 +129,8 @@ function appendUmountList() {
         if (!umountModule.umountedList.includes(item)) {
             listItem.querySelector('.indicator').classList.add('inactive');
         }
-        const entry = umountModule.mountEntryList.find(e => e.mount_point === item);
-        if (entry && entry.source === 'KSU' && umountModule.umountProvider !== 'none') {
+        const entry = umountModule.mountEntryList.find(e => e.mount_point === item && e.source === 'KSU');
+        if (entry && umountModule.umountProvider !== 'none') {
             let provider;
             if (umountModule.umountProvider === 'zygisknext') {
                 provider = 'ZygiskNext';
