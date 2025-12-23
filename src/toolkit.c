@@ -219,7 +219,8 @@ static int c_main(int argc, char **argv, char **envp)
 	if (!argv1)
 		goto show_usage;
 
-	if (!memcmp(argv1, "--setuid", sizeof("--setuid")) && 
+	// --setuid
+	if (!memcmp(&argv1[1], "-setuid", sizeof("-setuid")) && 
 		!!argv2 && !!argv2[4] && !argv2[5] && !argv[3]) {
 		
 		unsigned int cmd = dumb_str_to_appuid(argv2);
@@ -239,7 +240,8 @@ static int c_main(int argc, char **argv, char **envp)
 		goto fail;
 	}
 
-	if (!memcmp(argv1, "--getuid", sizeof("--getuid")) && !argv2) {
+	// --getuid
+	if (!memcmp(&argv1[1], "-getuid", sizeof("-getuid")) && !argv2) {
 		
 		// we dont care about closing the fd, it gets released on exit automatically
 		ksu_sys_reboot(KSU_INSTALL_MAGIC2, 0, (long)&fd);
@@ -265,7 +267,8 @@ static int c_main(int argc, char **argv, char **envp)
 		
 	}
 
-	if (!memcmp(argv1, "--getlist", sizeof("--getlist")) && !argv2) {
+	// --getlist
+	if (!memcmp(&argv1[2], "getlist", sizeof("getlist")) && !argv2) {
 		unsigned long total_size;
 
 		ksu_sys_reboot(KSU_INSTALL_MAGIC2, 0, (long)&fd);
