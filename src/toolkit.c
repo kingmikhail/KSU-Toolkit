@@ -234,7 +234,7 @@ static int c_main(int argc, char **argv, char **envp)
 			print_out(ok, strlen(ok));
 			return 0;
 		}
-		
+
 		goto fail;
 	}
 
@@ -253,11 +253,11 @@ static int c_main(int argc, char **argv, char **envp)
 		if (!(cmd.uid > 10000 && cmd.uid < 20000))
 			goto fail;
 
-		char gbuf[6] = { [5] = '\n' };
+		// yeah we reuse argv1 as our buffer
+		long_to_str(cmd.uid, 5, argv1);
+		argv1[5] = '\n';
 
-		long_to_str(cmd.uid, 5, gbuf);
-
-		print_out(gbuf, sizeof(gbuf));
+		print_out(argv1, 6);
 		
 		return 0;
 		
