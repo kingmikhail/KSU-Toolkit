@@ -1,5 +1,6 @@
 #!/bin/sh
 PATH=/data/adb/ksu/bin:$PATH
+MODDIR="/data/adb/modules/ksu_toolkit"
 
 if [ ! "$KSU" = true ]; then
 	abort "[!] KernelSU only!"
@@ -36,12 +37,27 @@ fi
 KSU_BIN_DIR="/data/adb/ksu/bin"
 if [ -d "$KSU_BIN_DIR" ]; then
 	echo "[+] creating symlink in $KSU_BIN_DIR"
-	busybox ln -sf "/data/adb/modules/ksu_toolkit/toolkit" "$KSU_BIN_DIR/toolkit"
+	busybox ln -sf "$MODDIR/toolkit" "$KSU_BIN_DIR/toolkit"
 fi
 
 OLD_MODULE_DIR="/data/adb/modules/ksu_switch_manager"
 if [ -d "$OLD_MODULE_DIR" ]; then
 	touch "$OLD_MODULE_DIR/remove"
+fi
+
+echo "[?] hot install?"
+echo "[+] press volume up within 3 seconds if so."
+if [ "$(busybox timeout 3 /system/bin/getevent -lq | grep -q KEY_VOLUMEUP 2>/dev/null ; echo $?)" -eq 0 ]; then
+
+	echo "[+] hot install forked to background"
+	echo "[+] no need to reboot"
+	( sleep 1 ; 
+		busybox rm -rf "$MODDIR" ; 
+		mkdir -p "$MODDIR" ; 
+		busybox cp -Lrf "$MODPATH"/* "$MODDIR" ; 
+		busybox rm -rf "$MODPATH"
+	) & # fork in background
+
 fi
 
 # EOF
