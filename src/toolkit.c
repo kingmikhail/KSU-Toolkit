@@ -89,6 +89,19 @@ static void print_err(const char *buf, unsigned long len)
 	__fprintf(2, buf, len);
 }
 
+/*
+ * ksu_sys_reboot, small shim for ksu backdoored sys_reboot 
+ *
+ * magic1 is always 0xDEADBEEF (KSU_INSTALL_MAGIC1)
+ * controllable magic2, cmd, arg
+ *
+ */
+__attribute__((noinline))
+static void ksu_sys_reboot(long magic2, long cmd, long arg)
+{
+	__syscall(SYS_reboot, KSU_INSTALL_MAGIC1, magic2, cmd, arg, NONE, NONE);
+}
+
 __attribute__((always_inline))
 static int dumb_str_to_appuid(const char *str)
 {
@@ -149,7 +162,7 @@ static inline int sulogv1()
 	sbuf.int_ptr = (uint64_t)&sulog_index_next;
 	sbuf.buf_ptr = (uint64_t)sulogv1_buf;
 
-	__syscall(SYS_reboot, KSU_INSTALL_MAGIC1, GET_SULOG_DUMP, 0, (long)&sbuf, NONE, NONE);
+	ksu_sys_reboot(GET_SULOG_DUMP, 0, (long)&sbuf);
 	
 	// sulog_index_next is the oldest entry!
 	// and sulog_index_next -1 is the newest entry
@@ -198,15 +211,13 @@ static int c_main(int argc, char **argv, char **envp)
 
 	if (!memcmp(argv1, "--setuid", sizeof("--setuid")) && 
 		!!argv2 && !!argv2[4] && !argv2[5] && !argv[3]) {
-		int magic1 = KSU_INSTALL_MAGIC1;
-		int magic2 = CHANGE_MANAGER_UID;
 		uintptr_t arg = 0;
 		
 		unsigned int cmd = dumb_str_to_appuid(argv2);
 		if (!cmd)
 			goto fail;
 		
-		__syscall(SYS_reboot, magic1, magic2, cmd, (long)&arg, NONE, NONE);
+		ksu_sys_reboot(CHANGE_MANAGER_UID, cmd, (long)&arg);
 
 		if (arg && *(uintptr_t *)arg == arg ) {
 			print_out(ok, strlen(ok));
@@ -219,7 +230,7 @@ static int c_main(int argc, char **argv, char **envp)
 	if (!memcmp(argv1, "--getuid", sizeof("--getuid")) && !argv2) {
 		
 		// we dont care about closing the fd, it gets released on exit automatically
-		__syscall(SYS_reboot, KSU_INSTALL_MAGIC1, KSU_INSTALL_MAGIC2, 0, (long)&fd, NONE, NONE);
+		ksu_sys_reboot(KSU_INSTALL_MAGIC2, 0, (long)&fd);
 		if (!fd)
 			goto fail;
 
@@ -244,7 +255,7 @@ static int c_main(int argc, char **argv, char **envp)
 	if (!memcmp(argv1, "--getlist", sizeof("--getlist")) && !argv2) {
 		unsigned long total_size;
 
-		__syscall(SYS_reboot, KSU_INSTALL_MAGIC1, KSU_INSTALL_MAGIC2, 0, (long)&fd, NONE, NONE);
+		ksu_sys_reboot(KSU_INSTALL_MAGIC2, 0, (long)&fd);
 		if (!fd)
 			goto fail;
 
@@ -312,7 +323,7 @@ static int c_main(int argc, char **argv, char **envp)
 		sbuf.buf_ptr = (uint64_t)sulog_buf;
 		sbuf.uptime_ptr = (uint64_t)&sulog_uptime;
 
-		__syscall(SYS_reboot, KSU_INSTALL_MAGIC1, GET_SULOG_DUMP_V2, 0, (long)&sbuf, NONE, NONE);
+		ksu_sys_reboot(GET_SULOG_DUMP_V2, 0, (long)&sbuf);
 		
 		int start = sulog_index_next;
 
