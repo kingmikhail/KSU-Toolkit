@@ -61,16 +61,6 @@ struct sulog_entry_rcv_ptr {
 #define GET_SULOG_DUMP 10009     // get sulog dump, max, last 100 escalations
 #define GET_SULOG_DUMP_V2 10010  // get sulog dump, timestamped, last 250 escalations
 
-__attribute__((noinline))
-static unsigned long strlen(const char *str)
-{
-	const char *s = str;
-	while (*s)
-		s++;
-
-	return s - str;
-}
-
 __attribute__((always_inline))
 static void __fprintf(long fd, const char *buf, unsigned long len)
 {
@@ -302,7 +292,9 @@ static int c_main(int argc, char **argv, char **envp)
 
 	bufwalk_start:
 		// get entry's string length first
-		int len = strlen(char_buf);
+		volatile int len = 0;
+		while (char_buf[len])
+			len++;
 
 		// write a newline to it, basically replacing \0 with \n
 		*(char_buf + len) = '\n';
