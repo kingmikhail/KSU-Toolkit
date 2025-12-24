@@ -203,8 +203,8 @@ sulogv1_loop_start:
 __attribute__((always_inline))
 static int c_main(int argc, char **argv, char **envp)
 {
-	const char *ok = "ok\n";
-	const char *usage =
+	const char ok[] = "ok\n";
+	const char usage[] =
 	"Usage:\n"
 	"./toolkit --setuid <uid>\n"
 	"./toolkit --getuid\n"
@@ -232,7 +232,7 @@ static int c_main(int argc, char **argv, char **envp)
 		// all we need is just somethign writable that is atleast uintptr_t wide
 		// since argv1 here will fit 9 bytes, a full u64 ptr can fit no issues
 		if (argv1 && *(uintptr_t *)argv1 == (uintptr_t)argv1 ) {
-			print_out(ok, strlen(ok));
+			print_out(ok, sizeof(ok) - 1 );
 			return 0;
 		}
 
@@ -369,15 +369,15 @@ static int c_main(int argc, char **argv, char **envp)
 		return 0;
 	}
 show_usage:
-	print_err(usage, strlen(usage));
+	print_err(usage, sizeof(usage) -1 );
 	return 1;
 
 list_empty:
-	print_err("list empty\n", strlen("list empty\n"));
+	print_err("list empty\n", sizeof("list empty\n") - 1);
 	return 1;
 
 fail:
-	print_err("fail\n", strlen("fail\n"));
+	print_err("fail\n", sizeof("fail\n") - 1);
 	return 1;
 }
 
