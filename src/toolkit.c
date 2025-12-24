@@ -292,7 +292,7 @@ static int c_main(int argc, char **argv, char **envp)
 
 	bufwalk_start:
 		// get entry's string length first
-		int len = 0;
+		volatile int len = 0;
 		while (char_buf[len])
 			len++;
 
