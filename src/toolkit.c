@@ -120,17 +120,19 @@ static int dumb_str_to_appuid(const char *str)
 	int i = 4;
 	int m = 1;
 
-	do {
-		// llvm actually has an optimized isdigit
-		// just not prefixed with __builtin
-		// code generated is the same size, so better use it
-		if (!isdigit(str[i]))
-			return 0;
+start:
+	// llvm actually has an optimized isdigit
+	// just not prefixed with __builtin
+	// code generated is the same size, so better use it
+	if (!isdigit(str[i]))
+		return 0;
 
-		uid = uid + ( *(str + i) - 48 ) * m;
-		m = m * 10;
-		i--;
-	} while (!(i < 0));
+	uid = uid + ( str[i] - '0' ) * m;
+	m = m * 10;
+	i--;
+	
+	if (!(i < 0))
+		goto start;
 
 	if (!(uid > 10000 && uid < 20000))
 		return 0;
@@ -228,18 +230,18 @@ static int c_main(int argc, char **argv, char **envp)
 		unsigned int cmd = dumb_str_to_appuid(argv2);
 		if (!cmd)
 			goto fail;
-		
+
+		// yeah we reuse argv1 as buffer		
 		ksu_sys_reboot(CHANGE_MANAGER_UID, cmd, (long)argv1);
 
-		// yeah we reuse argv1 as buffer
 		// all we need is just somethign writable that is atleast uintptr_t wide
 		// since argv1 here will fit 9 bytes, a full u64 ptr can fit no issues
-		if (argv1 && *(uintptr_t *)argv1 == (uintptr_t)argv1 ) {
-			print_out(ok, sizeof(ok) - 1 );
-			return 0;
-		}
+		if (*(uintptr_t *)argv1 != (uintptr_t)argv1 )
+			goto fail;
+		
+		print_out(ok, sizeof(ok) - 1 );
+		return 0;
 
-		goto fail;
 	}
 
 	// --getuid
@@ -288,6 +290,10 @@ static int c_main(int argc, char **argv, char **envp)
 
 		if (!total_size)
 			goto list_empty;
+
+		// this costs 20 bytes, dont bother.
+		//if (total_size > 8 * 1000 * 1000)
+		//	__builtin_trap();
 
 		// now we can prepare the same size of memory, VLA warning!
 		char buffer[total_size];
