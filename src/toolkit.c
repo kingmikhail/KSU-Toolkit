@@ -166,8 +166,7 @@ static inline int sulogv1(char **envp)
 {
 	uint32_t sulog_index_next;
 	char t[] = "sym: ? uid: ??????\n";
-
-	char *sulogv1_buf = envp[0]; // we reuse envp as buffer
+	char sulogv1_buf[SULOGV1_BUFSIZ];
 
 	struct sulogv1_entry_rcv_ptr sbuf = {0};
 	sbuf.int_ptr = (uint64_t)&sulog_index_next;
@@ -346,8 +345,7 @@ static int c_main(int argc, char **argv, char **envp)
 		uint32_t sulog_uptime = 0;
 		char uptime_text[] = "uptime: ??????????\n";
 		char text_v2[] = "sym: ? uid: ?????? time: ??????????\n";
-
-		char *sulog_buf = envp[0]; // we reuse envp as buffer
+		char sulog_buf[SULOG_BUFSIZ];
 
 		struct sulog_entry_rcv_ptr sbuf = {0};
 		sbuf.index_ptr = (uint64_t)&sulog_index_next;
