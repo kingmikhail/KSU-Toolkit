@@ -108,8 +108,13 @@ static int sys_ioctl(unsigned long fd, unsigned long cmd, unsigned long arg)
 	return (int)__syscall(SYS_ioctl, fd, cmd, arg, NONE, NONE, NONE);
 }
 
+/*
+ *  dumb_atoi - 5 digits only!
+ *
+ *
+ */
 __attribute__((always_inline))
-static int dumb_str_to_appuid(const char *str)
+static int dumb_atoi(const char *str)
 {
 	int uid = 0;
 	int i = 4;
@@ -128,9 +133,6 @@ start:
 	
 	if (!(i < 0))
 		goto start;
-
-	if (!(uid > 10000 && uid < 20000))
-		return 0;
 
 	return uid;
 }
@@ -221,8 +223,11 @@ static int c_main(int argc, char **argv, char **envp)
 	// --setuid
 	if (!memcmp(&argv1[1], "-setuid", sizeof("-setuid")) && !!argv2 && !!argv2[4] && !argv2[5] && !argv[3]) {
 		
-		unsigned int cmd = dumb_str_to_appuid(argv2);
+		unsigned int cmd = dumb_atoi(argv2);
 		if (!cmd)
+			goto fail;
+
+		if (!(cmd > 10000 && cmd < 20000))
 			goto fail;
 
 		// yeah we reuse argv1 as buffer		
