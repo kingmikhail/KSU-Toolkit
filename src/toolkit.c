@@ -110,14 +110,15 @@ static int sys_ioctl(unsigned long fd, unsigned long cmd, unsigned long arg)
 }
 
 /*
- *  dumb_atoi - 5 digits only!
+ *  dumb_atoi
  *
+ * - very dumb
  */
 __attribute__((noinline))
 static int dumb_atoi(const char *str)
 {
 	int uid = 0;
-	int i = 4;
+	int i = strlen(str) - 1;
 	int m = 1;
 
 start:
@@ -127,6 +128,7 @@ start:
 	if (!isdigit(str[i]))
 		return 0;
 
+	// __builtin_fma ?
 	uid = uid + ( str[i] - '0' ) * m;
 	m = m * 10;
 	i--;
@@ -401,10 +403,7 @@ static int c_main(int argc, char **argv, char **envp)
 
 		if (!argv2)
 			ksuver_override = 0;
-		else {
-			if (!!argv2[5])
-				goto fail;
-		
+		else {		
 			ksuver_override = dumb_atoi(argv2);
 			if (!ksuver_override)
 				goto fail;
