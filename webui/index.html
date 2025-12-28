@@ -35,9 +35,18 @@
                 <label for="save">Set manager on boot</label>
                 <md-switch id="save" disabled></md-switch>
             </div>
+            <div class="text-field-with-button" id="ksu-version">
+                <md-outlined-text-field label="set ksu version"></md-outlined-text-field>
+                <md-filled-icon-button class="text-field-button">
+                    <md-icon>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z"/></svg>
+                    </md-icon>
+                </md-filled-icon-button>
+            </div>
             <div class="list" id="manager-list">
                 <!-- list of manager -->
             </div>
+            <div class="safe-bottom-padding"></div>
             <div class="inactive-banner active" id="manager-loading">Loading...</div>
             <div class="inactive-banner" id="manager-empty">No other KernelSU manager found</div>
             <div class="inactive-banner" id="crown-unsupported">This feature is not available</div>
@@ -54,9 +63,9 @@
                 <label for="kernel-umount">Kernel umount</label>
                 <md-switch id="kernel-umount" disabled></md-switch>
             </div>
-            <div class="search-box" id="mount-entry-search" hidden>
+            <div class="text-field-with-button" id="mount-entry-search" hidden>
                 <md-outlined-text-field label="mount point"></md-outlined-text-field>
-                <md-filled-icon-button class="add-button">
+                <md-filled-icon-button class="text-field-button">
                     <md-icon>
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>
                     </md-icon>
@@ -66,6 +75,7 @@
             <div class="list" id="umount-list">
                 <!-- list of umount entry -->
             </div>
+            <div class="safe-bottom-padding"></div>
             <div class="inactive-banner" id="umount-unsupported">This feature is not available</div>
             <div class="inactive-banner" id="umount-empty">No umount entry added yet</div>
             <div class="inactive-banner" id="rezygisk">This feature is managed by ReZygisk</div>
@@ -83,6 +93,7 @@
             <div class="list" id="sulog-list">
                 <!-- list of SU log -->
             </div>
+            <div class="safe-bottom-padding"></div>
             <div class="inactive-banner active" id="sulist-loading">Loading...</div>
             <div class="inactive-banner" id="sulog-unsupported">This feature is not available</div>
         </div>

@@ -1,5 +1,5 @@
 import { toast, exec, spawn, listPackages, getPackagesInfo } from 'kernelsu-alt';
-import { modDir, bin, ksuDir } from './index.js';
+import { modDir, bin, ksuDir, uidFile, versionFile} from './index.js';
 
 let manager = [];
 let currentUid = null;
@@ -24,7 +24,8 @@ async function getKsuManager() {
                     manager.push({
                         packageName: pkg.packageName,
                         appLabel: pkg.appLabel,
-                        uid: pkg.uid
+                        uid: pkg.uid,
+                        versionCode: pkg.versionCode
                     });
                 });
             } catch (e) {
@@ -62,8 +63,8 @@ async function setManager(uid, manager) {
 }
 
 function saveManager(uid) {
-    const cmd = uid ? `echo ${uid} >` : 'rm -rf';
-    exec(`${cmd} ${ksuDir}/.manager_uid`).then((result) => {
+    const cmd = uid ? `echo ${uid} >` : `rm -rf ${versionFile}`;
+    exec(`${cmd} ${uidFile}`).then((result) => {
         if (result.errno !== 0) toast("Failed to save manager_uid: " + result.stderr);
     }).catch(() => { });
 }

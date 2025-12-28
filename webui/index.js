@@ -23,7 +23,8 @@ export const bin = 'toolkit';
 export const ksud = "/data/adb/ksud";
 export const ksuDir = '/data/adb/ksu';
 
-const uidFile = ksuDir + "/.manager_uid";
+export const uidFile = ksuDir + "/.manager_uid";
+export const versionFile = ksuDir + "/.manager_version";
 export const umountEntryFile = ksuDir + "/.umount_list";
 
 // Manager uid crown
@@ -42,15 +43,18 @@ function appendManagerList() {
                         ${item.appLabel}
                         <div class="app-uid">${item.uid}</div>
                     </span>
-                    <span class="package-name">${item.packageName}</span>
+                    <span class="package-name">${item.packageName} (${item.versionCode})</span>
                 </div>
             </label>
-            <md-radio id="${item.packageName}" name="manager-group" value="${item.uid.toString()}"></md-radio>
+            <md-radio id="${item.packageName}" name="manager-group" value="${item.uid.toString()}" version="${item.versionCode}"></md-radio>
             <md-ripple></md-ripple>
         `;
         if (uidModule.currentUid && item.uid == uidModule.currentUid) {
             listItem.querySelector('md-radio').checked = true;
         }
+        listItem.querySelector('md-radio').addEventListener('change', () => {
+            document.getElementById('ksu-version').querySelector('md-outlined-text-field').value = item.versionCode;
+        });
         managerList.append(listItem);
     });
 }
@@ -58,6 +62,9 @@ function appendManagerList() {
 function setupUidPageListener() {
     const saveSwitch = document.getElementById('save');
     const crownBtn = document.getElementById('crown');
+    const ksuVersion = document.getElementById('ksu-version');
+    const versionTextField = ksuVersion.querySelector('md-outlined-text-field');
+    const setVersionBtn = ksuVersion.querySelector('.text-field-button');
 
     if (uidModule.manager.length === 0) {
         saveSwitch.selected = false;
@@ -89,6 +96,24 @@ function setupUidPageListener() {
             uidModule.setManager(radio.value, radio.id);
             crownBtn.classList.remove('show');
             document.getElementById('exit-btn').click();
+        });
+    }
+
+    let executing = false;
+    setVersionBtn.onclick = () => {
+        if (executing) return;
+        executing = true;
+        exec(`
+            targetVersion=${versionTextField.value.trim()}
+            if [ -s "${uidFile}" ]; then
+                [ -z $targetVersion ] && rm -rf ${versionFile} || echo $targetVersion > ${versionFile}
+            fi
+            ${bin} --setver ${versionTextField.value}
+            `,{ env: { PATH: `$PATH:${modDir}` }}
+        ).then((result) => {
+            versionTextField.value = '';
+            executing = false;
+            toast(result.stdout.trim() !== '' ? result.stdout : result.stderr);
         });
     }
 }
@@ -152,7 +177,7 @@ function appendUmountList() {
 function setupSeachOption() {
     const searchBox = document.getElementById('mount-entry-search');
     const seach = searchBox.querySelector('md-outlined-text-field');
-    const addBtn = searchBox.querySelector('.add-button');
+    const addBtn = searchBox.querySelector('.text-field-button');
     const menu = searchBox.querySelector('md-menu');
 
     menu.defaultFocus = '';

@@ -151,7 +151,7 @@ label {
     white-space: nowrap;
 }
 
-.search-box {
+.text-field-with-button {
     width: 100%;
     display: flex;
     margin: 16px 0;
@@ -159,7 +159,7 @@ label {
     position: relative;
 }
 
-.add-button {
+.text-field-button {
     flex-shrink: 0;
     --md-filled-icon-button-container-height: 56px;
     --md-filled-icon-button-container-width: 56px;
@@ -326,6 +326,11 @@ md-menu-item {
 
 #crown.show {
     transform: scale(1);
+}
+
+.safe-bottom-padding {
+    width: 100%;
+    height: calc(var(--bottom-inset) + 64px);
 }
 
 [slot="headline"] {
