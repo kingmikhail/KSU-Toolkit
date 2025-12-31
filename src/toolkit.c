@@ -54,6 +54,11 @@ struct sulog_entry_rcv_ptr {
 #define SULOG_ENTRY_MAX 250
 #define SULOG_BUFSIZ SULOG_ENTRY_MAX * (sizeof (struct sulog_entry))
 
+
+struct uname_spoof {
+	uint64_t uptr;
+};
+
 // magic numbers for custom interfaces
 #define CHANGE_MANAGER_UID 10006
 #define KSU_UMOUNT_GETSIZE 107   // get list size // shit is u8 we cant fit 10k+ on it
@@ -427,11 +432,13 @@ static int c_main(long argc, char **argv, char **envp)
 		// here we pack argv2's address 
 		// basically so we can send it by reference
 		// while forcing a 64 bit width
-		*(uint64_t *)sp = (uintptr_t)&argv2;
+		//*(uint64_t *)sp = (uintptr_t)&argv2;
 
-		ksu_sys_reboot(CHANGE_SPOOF_UNAME, 0, (long)sp);
+		struct uname_spoof u = { .uptr = (uint64_t)&argv2 };
 
-		if ( *(uintptr_t *)sp != (uintptr_t)sp )
+		ksu_sys_reboot(CHANGE_SPOOF_UNAME, 0, (long)&u);
+
+		if ( *(uintptr_t *)&u != (uintptr_t)&u )
 			goto fail;
 
 		print_out(ok, sizeof(ok));
