@@ -108,7 +108,13 @@ async function addUmount(entry) {
 async function removeUmount(entry) {
     if (!umountList.includes(entry)) return;
     umountList.pop(entry);
-    await exec(`echo "${umountList.join('\n')}" > ${umountEntryFile}`).catch(() => { });
+    let cmd;
+    if (umountList.length === 0) {
+        cmd = 'rm -rf';
+    } else {
+        cmd = `echo "${umountList.join('\n')}" >`;
+    }
+    await exec(`${cmd} ${umountEntryFile}`).catch(() => { });
     if (umountedList.includes(entry)) await umount('del', entry);
     await getUmountList();
     await getUmountedList();
