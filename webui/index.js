@@ -1,4 +1,6 @@
 import { exec, spawn, toast } from 'kernelsu-alt';
+import '@material/web/button/filled-button.js';
+import '@material/web/button/outlined-button.js';
 import '@material/web/chips/chip-set.js';
 import '@material/web/chips/filter-chip.js';
 import '@material/web/fab/fab.js';
@@ -17,6 +19,7 @@ import '@material/web/textfield/outlined-text-field.js';
 import * as uidModule from './uid.js';
 import * as umountModule from './umount.js';
 import * as sulogModule from './sulog.js';
+import * as unameModule from './uname.js';
 
 export const modDir = '/data/adb/modules/ksu_toolkit';
 export const bin = 'toolkit';
@@ -26,6 +29,7 @@ export const ksuDir = '/data/adb/ksu';
 export const uidFile = ksuDir + "/.manager_uid";
 export const versionFile = ksuDir + "/.manager_version";
 export const umountEntryFile = ksuDir + "/.umount_list";
+export const unameFile = ksuDir + "/.uname";
 
 // Manager uid crown
 function appendManagerList() {
@@ -468,6 +472,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     // SU log feature init
     await sulogModule.getAppList();
     checkSuLogFeature();
+
+    // Uname feature init
+    unameModule.getDefaultUname();
+    unameModule.getUname();
+    unameModule.initListeners();
 
     checkUpdate();
 });

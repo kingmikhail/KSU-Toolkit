@@ -26,6 +26,7 @@
             <md-tabs>
                 <md-primary-tab id="crown-tab" aria-controls="content-crown" active>Crown</md-primary-tab>
                 <md-primary-tab id="umount-tab" aria-controls="content-umount">Umount</md-primary-tab>
+                <md-primary-tab id="uname" aria-controls="content-uname">Uname</md-primary-tab>
                 <md-primary-tab id="sulog-tab" aria-controls="content-sulog">SU log</md-primary-tab>
             </md-tabs>
         </div>
@@ -77,6 +78,19 @@
                 <div class="inactive-banner" id="umount-unsupported">This feature is not available</div>
                 <div class="inactive-banner" id="umount-empty">No umount entry added yet</div>
                 <div class="inactive-banner" id="rezygisk">This feature is managed by ReZygisk</div>
+            </div>
+            <!-- Uname -->
+            <div class="content-container unresolved" id="content-uname" role="tabpanel" aria-labelledby="uname-tab">
+                <div class="uname-content content">
+                    <div class="switch-item">
+                        <label for="uname-set-on-boot">Set uname on boot</label>
+                        <md-switch id="uname-set-on-boot"></md-switch>
+                    </div>
+                    <md-outlined-text-field label="Release" id="uname-release"></md-outlined-text-field>
+                    <md-outlined-text-field label="Version" id="uname-version"></md-outlined-text-field>
+                    <md-filled-button id="uname-apply">APPLY</md-filled-button>
+                    <md-outlined-button id="uname-reset">RESET</md-outlined-button>
+                </div>
             </div>
             <!-- sulog -->
             <div class="content-container unresolved" id="content-sulog" role="tabpanel" aria-labelledby="sulog-tab">

@@ -90,6 +90,12 @@ md-tabs {
     max-width: min(768px, calc(100% - 32px));
 }
 
+.uname-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
 .switch-item {
     display: flex;
     align-items: center;
