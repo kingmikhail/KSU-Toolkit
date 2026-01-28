@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 env:
-  MODULE_NAME: 'KSU-Toolkit'
+  MODULE_NAME: 'KSUToolkit'
 
 jobs:
   build:
@@ -43,15 +43,15 @@ jobs:
           
           cd ../bin
 
-          wc -c toolkit-*
+          wc -c Toolkit-*
           
-          ../sstrip -z toolkit-arm64
-          ../sstrip -z toolkit-arm
+          ../sstrip -z Toolkit-arm64
+          ../sstrip -z Tolkit-arm
 
-          wc -c toolkit-*
-          file toolkit-*
+          wc -c Toolkit-*
+          file Toolkit-*
           mkdir -p ../module/bin
-          mv toolkit-* ../module/bin
+          mv Toolkit-* ../module/bin
 
       - name: Build WebUI
         run: |
