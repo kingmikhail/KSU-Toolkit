@@ -1,43 +1,43 @@
 #!/bin/sh
 PATH=/data/adb/ksu/bin:$PATH
-MODDIR="/data/adb/modules/ksu_toolkit"
+MODDIR="/data/adb/modules/KSUToolkit"
 
 if [ ! "$KSU" = true ]; then
-	abort "[!] KernelSU only!"
+	abort "KernelSU or Forks"
 fi
 
 # this assumes CONFIG_COMPAT=y on CONFIG_ARM
 arch=$(busybox uname -m)
-echo "[+] detected: $arch"
+echo "Detected: $arch"
 
 case "$arch" in
 	aarch64 | arm64 )
-		ELF_BINARY="toolkit-arm64"
+		ELF_BINARY="Toolkit-arm64"
 		;;
 	armv7l | armv8l )
-		ELF_BINARY="toolkit-arm"
+		ELF_BINARY="Toolkit-arm"
 		;;
 	*)
-		abort "[!] $arch not supported!"
+		abort "$arch Not Supported"
 		;;
 esac
 
-mv "$MODPATH/bin/$ELF_BINARY" "$MODPATH/toolkit"
+mv "$MODPATH/bin/$ELF_BINARY" "$MODPATH/Toolkit"
 rm -rf "$MODPATH/bin"
 
-chmod 755 "$MODPATH/toolkit"
+chmod 755 "$MODPATH/Toolkit"
 
-current_uid=$("$MODPATH/toolkit" --getuid)
+current_uid=$("$MODPATH/Toolkit" --getuid)
 
-if ! "$MODPATH/toolkit" --setuid "$current_uid" >/dev/null 2>&1; then
-	abort "[!] custom interface not available!"
+if ! "$MODPATH/Toolkit" --setuid "$current_uid" >/dev/null 2>&1; then
+	abort "Custom Interface Not Available"
 fi
 
 # add symlink
 KSU_BIN_DIR="/data/adb/ksu/bin"
 if [ -d "$KSU_BIN_DIR" ]; then
-	echo "[+] creating symlink in $KSU_BIN_DIR"
-	busybox ln -sf "$MODDIR/toolkit" "$KSU_BIN_DIR/toolkit"
+	echo "Creating SymLink in $KSU_BIN_DIR"
+	busybox ln -sf "$MODDIR/Toolkit" "$KSU_BIN_DIR/Toolkit"
 fi
 
 OLD_MODULE_DIR="/data/adb/modules/ksu_switch_manager"
@@ -56,16 +56,16 @@ hot_install() {
 	) & # fork in background
 }
 
-echo "[?] hot install?"
-echo "[!] press volume up within 6 seconds if so."
+echo "Perform Hot Install?"
+echo "Press Volume UP within 6 Secs If So..."
 if [ "$(busybox timeout 3 /system/bin/getevent -lq | grep -q KEY_VOLUMEUP 2>/dev/null ; echo $?)" -eq 0 ]; then
 	hot_install
-	echo "[+] hot install forked to background"
+	echo "Hot Install Forked To Background"
 else
-	echo "[!] no volume up within 5 seconds"
-	echo "[+] performing hot install anyway"
+	echo "No Volume UP Detected Within 6 Secs"
+	echo "Performing Hot Install"
 	hot_install
 fi
-echo "[+] no need to reboot"
+echo "No Need To Reboot Device"
 
 # EOF
