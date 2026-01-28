@@ -8,28 +8,28 @@ on:
   workflow_dispatch:
 
 env:
-  MODULE_NAME: 'ksu_toolkit'
+  MODULE_NAME: 'KSU-Toolkit'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
+      - name: Checkout Repository
         uses: actions/checkout@v6
 
-      - name: Setup zig
+      - name: Setup Zig
         uses: mlugg/setup-zig@v2
         with:
           version: master
 
-      - name: grab sstrip from ELFkickers
+      - name: Grab SStrip from ELFKickers
         run: |
           curl -L https://www.muppetlabs.com/~breadbox/pub/software/ELFkickers-3.2.tar.gz -o sstrip.tar.gz
           tar xf sstrip.tar.gz
           make -C ELFkickers-3.2 sstrip
           cp ELFkickers-3.2/sstrip/sstrip .
 
-      - name: compile via zigcc
+      - name: Compile via ZigCC 
         run: |
           echo "aarch64"
           pwd
@@ -59,10 +59,10 @@ jobs:
           npm ci
           npm run build
 
-      - name: Update version code
+      - name: Update Version Code
         run: sed -i 's/^versionCode=.*/versionCode=${{ github.run_number }}/' module/module.prop
 
-      - name: Upload artifact
+      - name: Upload Artifact
         uses: actions/upload-artifact@v6
         with:
           name: ${{ env.MODULE_NAME }}-${{ github.run_number }}
