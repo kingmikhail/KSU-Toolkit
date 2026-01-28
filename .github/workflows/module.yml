@@ -1,4 +1,4 @@
-name: build module
+name: Buil Module
 
 on:
   push:
